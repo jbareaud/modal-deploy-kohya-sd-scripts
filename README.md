@@ -1,8 +1,6 @@
 # Run Kohya_SS SD-SCRIPTS on Modal - Cloud-Based LoRA Training
 
-This repository provides a working configuration to run the popular Kohya_SS sd-script on the [Modal](https://modal.com) serverless platform. This setup allows you to leverage powerful cloud GPUs (A10G, A100, H100, etc.) for training LoRA models (and other Dreambooth-style training) without complex local installations or CUDA/driver headaches.
-
-This project aims to provide a straightforward path for users to train their models in the cloud using a familiar web interface.
+Modified version of [IjoiK/modal-deploy-kohya-ss](https://github.com/IjoiK/modal-deploy-kohya-ss) to run on a more recent version of [Kohya-ss' sd-scripts](https://github.com/kohya-ss/sd-scripts).
 
 ## Prerequisites
 
@@ -23,8 +21,8 @@ Before you begin, ensure you have the following:
 
 1.  **Clone this Repository:**
     ```bash
-    git clone https://github.com/IjoiK12/modal-deploy-kohya-ss.git
-    cd modal-deploy-kohya-ss
+    git clone https://github.com/jbareaud/modal-deploy-kohya-sd-scripts
+    cd modal-deploy-kohya-sd-scripts
     ```
 
 2.  **Configure `config.toml`:**
@@ -32,7 +30,6 @@ Before you begin, ensure you have the following:
 
     ```toml
     [modal_settings]
-    # allow_concurrent_inputs = 10  # Max concurrent requests for @modal.concurrent
     container_idle_timeout = 600  # Idle time in seconds before container scales down (used for scaledown_window)
     timeout = 7200                # Max container lifetime in seconds (e.g., 2 hours)
     cpu = 2
@@ -58,20 +55,27 @@ The `app.py` script maps these volumes to paths inside the container:
 
 **Uploading Base Models:**
    * Volume Name: `kohya-models`
-   * Example: If your model `my_sdxl_model.safetensors` is locally at `C:\AI\Models\my_sdxl_model.safetensors`:
+   * Example: 
         ```bash
-        modal volume put kohya-models C:\AI\Models\my_sdxl_model.safetensors /my_sdxl_model.safetensors
+        modal volume put kohya-models /mnt/ssd1/StableDiffusion/models/text_encoders/qwen_3_06b_base.safetensors /qwen_3_06b_base.safetensors
+        modal volume put kohya-models /mnt/ssd1/StableDiffusion/models/diffusion_models/anima_baseV10.safetensors /anima_baseV10.safetensors
+        modal volume put kohya-models /mnt/ssd1/StableDiffusion/models/vae/qwen_image_vae.safetensors /qwen_image_vae.safetensors
         ```
-        This makes the model available inside the container at `/kohya_ss/models/my_sdxl_model.safetensors`.
 
 **Uploading Datasets:**
    * Volume Name: `kohya-dataset`
-   * Kohya_SS expects a specific directory structure for datasets, typically: `Your_Image_Folder_In_GUI/Repeats_InstanceToken/image.png`.
-   * Example: If your processed dataset folder (e.g., `40_mycharacter_style`) is locally at `D:\TrainingData\my_style_project\40_mycharacter_style`:
+   * Example: 
         ```bash
-        modal volume put kohya-dataset D:\TrainingData\my_style_project\40_mycharacter_style /40_mycharacter_style
+        modal volume put kohya-dataset /mnt/ssd1/StableDiffusion/lora/MyChara/in/5_MyChara /5_MyChara
         ```
-        This makes the dataset available inside the container at `/kohya_ss/dataset/40_mycharacter_style/`. When using the Kohya GUI, you would set "Image folder" to `/kohya_ss/dataset/`.
+
+**Uploading train config:**
+   * Volume Name: `kohya-configs`
+   * Example: 
+        ```bash
+        modal volume put kohya-configs -f train_config.toml train_config.toml
+        modal volume put kohya-configs -f dataset_config.toml dataset_config.toml 
+        ```
 
 **Verifying Volume Contents:**
    * You can list the contents of your volumes:
@@ -87,7 +91,7 @@ modal deploy app.py
 ```
 This deploys the application to Modal, where it will run in the background and be accessible via a persistent URL. You can close your terminal. To update the deployment after code changes, run this command again.
 
-Once models/dataset are in place :
+Once models/dataset/configs have been copied in place :
 
 ```bash
 modal run --detach app.py::train_anima
@@ -107,4 +111,6 @@ modal run --detach app.py::train_anima
 Your trained models (LoRA files, etc.) will be saved to the `/kohya_ss/outputs/` directory within the `kohya-outputs` volume. Use `modal volume get` to download them:
 
 ```bash
-modal volume get kohya-outputs /my_awesome_lora.safetensors C:\LoRAs\my_awesome_lora.safetensors
+modal volume get kohya-outputs /models /mnt/ssd1/StableDiffusion/lora/MyChara/release/v5/models
+modal volume get kohya-outputs /log /mnt/ssd1/StableDiffusion/lora/MyChara/release/v5/log
+```
