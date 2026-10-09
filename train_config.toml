@@ -1,0 +1,49 @@
+
+dataset_config = "/kohya_ss/configs/dataset_config.toml"
+
+gradient_accumulation_steps = 2
+gradient_checkpointing = true
+
+save_model_as = "safetensors"
+save_precision = "bf16"
+seed = 12345
+xformers = true
+split_attn = false
+
+timestep_sampling = "sigmoid"
+discrete_flow_shift = 1.0
+
+cache_latents = true
+cache_latents_to_disk = true
+
+pretrained_model_name_or_path = "/kohya_ss/models/anima_baseV10.safetensors"
+qwen3 = "/kohya_ss/models/qwen_3_06b_base.safetensors"
+vae = "/kohya_ss/models/qwen_image_vae.safetensors"
+
+network_module = "networks.lora_anima"
+network_dim = 32
+network_alpha = 16
+
+#network_args = ["rank_dropout=0.1", "module_dropout=0.1"]
+
+learning_rate = 1e-4
+network_train_unet_only = true
+
+lr_scheduler = "cosine"
+
+optimizer_type = "AdamW8bit"
+optimizer_args = [ "weight_decay=0.01", "betas=0.9,0.99"]
+
+mixed_precision = "bf16"
+
+wandb_run_name = "Lora"
+output_name = "Lora"
+logging_dir = "/kohya_ss/outputs/log"
+output_dir = "/kohya_ss/outputs/models"
+
+save_every_n_epochs = 1
+max_train_epochs = 30
+max_train_steps = 6000
+
+keep_tokens = 1
+

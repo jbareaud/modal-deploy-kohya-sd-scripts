@@ -1,0 +1,18 @@
+# reference : https://github.com/kohya-ss/sd-scripts/blob/v0.12.0/docs/config_README-en.md
+[general]
+shuffle_caption = true
+caption_extension = ".txt"
+enable_bucket = true
+bucket_no_upscale = true
+bucket_reso_steps = 64
+min_bucket_reso = 512
+max_bucket_reso = 2048
+
+[[datasets]]
+resolution = [1024, 1024]
+batch_size = 2
+
+  [[datasets.subsets]]
+  image_dir = "/kohya_ss/dataset/5_MikoMido"
+  num_repeats = 5
+
