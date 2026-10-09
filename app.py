@@ -11,9 +11,7 @@ logger = logging.getLogger(__name__)
 PYTHON_VERSION = "3.10"
 KOHYA_REPO_URL = "https://github.com/kohya-ss/sd-scripts.git"
 KOHYA_COMMIT = "690ea7f96c23182352ec63def76d431c6120bd2f" # https://github.com/kohya-ss/sd-scripts/releases/tag/v0.12.0
-#NVIDIA_CUDA_IMAGE = "nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04"
 NVIDIA_CUDA_IMAGE = "nvidia/cuda:12.4.0-devel-ubuntu22.04"
-
 
 kohya_image = (
     modal.Image.from_registry(
@@ -34,7 +32,6 @@ kohya_image = (
         "libpng-dev",
         "google-perftools",
     )
-    #.env({"KOHYA_VERSION_DATE": "2025-05-25"})
     .env({"LD_PRELOAD": "/usr/lib/x86_64-linux-gnu/libtcmalloc.so.4"})
     .run_commands(
         "set -ex",
@@ -77,8 +74,6 @@ try:
     logger.info("Load config.toml")
     config = toml.load(CONFIG_FILE)
     modal_settings = config.get('modal_settings', {})
-    ALLOW_CONCURRENT_INPUTS = modal_settings.get('allow_concurrent_inputs', 10)
-    logger.info(f"ALLOW_CONCURRENT_INPUTS: {ALLOW_CONCURRENT_INPUTS}")
     CONTAINER_IDLE_TIMEOUT = modal_settings.get('container_idle_timeout', 600)
     logger.info(f"CONTAINER_IDLE_TIMEOUT: {CONTAINER_IDLE_TIMEOUT}")
     TIMEOUT = modal_settings.get('timeout', 3600)
@@ -91,7 +86,6 @@ try:
     logger.info(f"MEMORY_CONFIG: {MEMORY_CONFIG}")
 except Exception as e:
     logger.info("Loading config.toml failed, using default settings")
-    ALLOW_CONCURRENT_INPUTS = 5
     CONTAINER_IDLE_TIMEOUT = 300
     TIMEOUT = 1800
     CPU_CONFIG = 2
@@ -101,14 +95,13 @@ except Exception as e:
 app = modal.App(name="kohya-ss-sd-scripts", image=kohya_image)
 
 class Paths:
-    CACHE = "/cache"
+    #CACHE = "/cache"
     KOHYA_BASE = "/kohya_ss"
     MODELS = "/kohya_ss/models"
     DATASET = "/kohya_ss/dataset"
     OUTPUTS = "/kohya_ss/outputs"
     CONFIGS = "/kohya_ss/configs"
 
-cache_vol = modal.Volume.from_name("hf-cache", create_if_missing=True)
 models_vol = modal.Volume.from_name("kohya-models", create_if_missing=True)
 dataset_vol = modal.Volume.from_name("kohya-dataset", create_if_missing=True)
 outputs_vol = modal.Volume.from_name("kohya-outputs", create_if_missing=True)
@@ -129,12 +122,32 @@ configs_vol = modal.Volume.from_name("kohya-configs", create_if_missing=True)
     max_containers=1,
     retries=0,
 )
-
 def train_anima():
     import torch
-    
+    from huggingface_hub import snapshot_download
+
     logger.info(f"CUDA available: {torch.cuda.is_available()}")
     logger.info(f"Pytorch version: {torch.__version__}")
+
+    target_qwen_dir = f"{Paths.CONFIGS}/qwen3_06b"
+    if not os.path.exists(target_qwen_dir):
+        logger.info(f"Downloading Qwen3 0.6b tokenizer to {target_qwen_dir}...")
+        snapshot_download(
+            repo_id="Qwen/Qwen3-0.6B",
+            local_dir=target_qwen_dir,
+            allow_patterns=["config.json", "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"],
+        )
+
+    target_t5_dir = f"{Paths.CONFIGS}/t5_old"
+    if not os.path.exists(target_t5_dir):
+        logger.info(f"Downloading T5 tokenizer to {target_t5_dir}...")
+        snapshot_download(
+            repo_id="google/t5-v1_1-xxl",
+            local_dir=target_t5_dir,
+            allow_patterns=["spiece.model", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"],
+        )
+
+    configs_vol.commit()
 
     subprocess.run(
     [
@@ -142,16 +155,14 @@ def train_anima():
         "launch",
         "anima_train_network.py",
         "--config_file",
-        #"/kohya_ss/train_toml/train_config.toml",
         f"{Paths.CONFIGS}/train_config.toml",
     ],
-    cwd="/kohya_ss",
+    cwd=f"{Paths.KOHYA_BASE}",
     check=True,
     )
+    outputs_vol.commit()
     logger.info("Training complete. Exiting container.")
 
 @app.local_entrypoint()
 def main():
-    #call = train_anima.spawn()
-    #print(f"Job ID: {call.object_id}")
     train_anima.remote()

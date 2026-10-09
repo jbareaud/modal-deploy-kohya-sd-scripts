@@ -1,17 +1,8 @@
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/IjoiK/modal-deploy-kohya-ss?utm_source=oss&utm_medium=github&utm_campaign=IjoiK%2Fmodal-deploy-kohya-ss&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
-# Run Kohya_SS GUI on Modal - Cloud-Based LoRA Training
+# Run Kohya_SS SD-SCRIPTS on Modal - Cloud-Based LoRA Training
 
-This repository provides a working configuration to run the popular Kohya_SS GUI (by bmaltais) on the [Modal](https://modal.com) serverless platform. This setup allows you to leverage powerful cloud GPUs (A10G, A100, H100, etc.) for training LoRA models (and other Dreambooth-style training) without complex local installations or CUDA/driver headaches.
+This repository provides a working configuration to run the popular Kohya_SS sd-script on the [Modal](https://modal.com) serverless platform. This setup allows you to leverage powerful cloud GPUs (A10G, A100, H100, etc.) for training LoRA models (and other Dreambooth-style training) without complex local installations or CUDA/driver headaches.
 
-This project aims to provide a straightforward path for users 누가to train their models in the cloud using a familiar web interface.
-
-## Features
-
-* **Cloud GPU Access:** Train on various NVIDIA GPUs, paying only for usage.
-* **Simplified Setup:** Avoids most local environment configuration issues.
-* **Familiar Web UI:** Uses the standard Kohya_SS Gradio interface.
-* **Persistent Storage:** Utilizes `modal.Volume` for models, datasets, and outputs, ensuring data persistence between sessions.
-* **Controlled Updates:** Includes a mechanism to update the Kohya_SS version when desired.
+This project aims to provide a straightforward path for users to train their models in the cloud using a familiar web interface.
 
 ## Prerequisites
 
@@ -20,8 +11,9 @@ Before you begin, ensure you have the following:
 1.  **A Modal Account:** Sign up at [modal.com](https://modal.com). New users often receive free credits.
 2.  **Modal Client Installed and Configured:**
     ```bash
-    pip install modal-client
-    modal token new
+    pip install modal
+    modal setup
+    modal token info
     ```
 3.  **Python:** Python 3.10 or newer installed locally.
 4.  **Git:** For cloning this repository.
@@ -43,10 +35,9 @@ Before you begin, ensure you have the following:
     # allow_concurrent_inputs = 10  # Max concurrent requests for @modal.concurrent
     container_idle_timeout = 600  # Idle time in seconds before container scales down (used for scaledown_window)
     timeout = 7200                # Max container lifetime in seconds (e.g., 2 hours)
+    cpu = 2
     gpu = "A10G"                  # GPU type: "A10G", "T4", "L4", "A100", "H100"
-
-    [kohya_settings]
-    port = 8000                   # Port for the web UI inside the container
+    memory = 10240                # Amount of RAM reserved
     ```
     * `gpu`: Choose based on your needs. `A10G` (24GB VRAM) is a good starting point for many tasks. For SDXL or larger batches, consider `A100` (40GB or 80GB) or `H100` (80GB).
     * `container_idle_timeout`: This is used for `scaledown_window`. 600 seconds = 10 minutes. If `min_containers` is 0 (default or not set in `app.py`), the container will stop after this period of inactivity.
@@ -91,34 +82,25 @@ The `app.py` script maps these volumes to paths inside the container:
 
 ## Running the Application
 
-You have two primary ways to run the application:
+```bash
+modal deploy app.py
+```
+This deploys the application to Modal, where it will run in the background and be accessible via a persistent URL. You can close your terminal. To update the deployment after code changes, run this command again.
 
-1.  **Temporary Run (for Development/Testing):**
-    ```bash
-    modal serve app.py
-    ```
-    The application will run as long as this command is active in your terminal. Modal will provide a temporary URL to access the GUI. Press `Ctrl+C` to stop.
+Once models/dataset are in place :
 
-2.  **Persistent Deployment:**
-    ```bash
-    modal deploy app.py
-    ```
-    This deploys the application to Modal, where it will run in the background and be accessible via a persistent URL. You can close your terminal. To update the deployment after code changes, run this command again.
+```bash
+modal run --detach app.py::train_anima
+```
 
-Modal will output the URL (e.g., `https://your_username--kohya-ss-gui-run-kohya-gui-dev.modal.run`) for the web interface.
+## Using the Kohya_SS with Modal paths
 
-## Using the Kohya_SS GUI
-
-1.  Open the URL provided by Modal in your web browser.
-2.  Navigate to the desired training tab (e.g., LoRA, Dreambooth).
-3.  **Crucially, when specifying paths in the GUI, use the paths *inside the container*:**
+**When specifying paths in the GUI, use the paths *inside the container*:**
     * **Pretrained model name or path:** `/kohya_ss/models/your_model_name.safetensors`
     * **Image folder (Dataset directory):** `/kohya_ss/dataset/` (Kohya will then look for your `Repeats_InstanceToken` subfolders inside this path).
     * **Output folder:** `/kohya_ss/outputs/`
     * **Logging folder:** `/kohya_ss/outputs/logs` (or your preference within `/kohya_ss/outputs/`)
     * **LoRA model output name:** (e.g., `my_awesome_lora`)
-4.  Configure all other training parameters as desired.
-5.  Start the training.
 
 ## Downloading Results
 

@@ -11,8 +11,9 @@ max_bucket_reso = 2048
 [[datasets]]
 resolution = [1024, 1024]
 batch_size = 2
+keep_tokens = 2
 
   [[datasets.subsets]]
   image_dir = "/kohya_ss/dataset/5_MikoMido"
   num_repeats = 5
-
+  keep_tokens = 2

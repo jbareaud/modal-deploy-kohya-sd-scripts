@@ -1,8 +1,6 @@
 [modal_settings]
-allow_concurrent_inputs = 10
 container_idle_timeout = 3600
 timeout = 7200
 cpu = 2
-gpu = "H100"        # GPU type: T4, L4, A10, L40S, A100, A100-40GB, A100-80GB, RTX-PRO-6000, H100/H100!, H200, B200/B200+
+gpu = "H100"        # A100 recommended; GPU type: T4, L4, A10, L40S, A100, A100-40GB, A100-80GB, RTX-PRO-6000, H100/H100!, H200, B200/B200+
 memory = 10240      # Amount of RAM reserved
-
