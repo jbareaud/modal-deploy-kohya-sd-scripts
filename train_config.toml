@@ -1,4 +1,4 @@
-dataset_config = "/kohya_ss/configs/dataset_config.toml"
+dataset_config = "/kohya_ss/train_configs/dataset_config.toml"
 
 gradient_accumulation_steps = 2
 gradient_checkpointing = true
@@ -35,8 +35,8 @@ optimizer_args = [ "weight_decay=0.01", "betas=0.9,0.99"]
 
 mixed_precision = "bf16"
 
-wandb_run_name = "Lora"
-output_name = "Lora"
+wandb_run_name = "MyChara"
+output_name = "MyChara"
 logging_dir = "/kohya_ss/outputs/log"
 output_dir = "/kohya_ss/outputs/models"
 

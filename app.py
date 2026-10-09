@@ -100,12 +100,12 @@ class Paths:
     MODELS = "/kohya_ss/models"
     DATASET = "/kohya_ss/dataset"
     OUTPUTS = "/kohya_ss/outputs"
-    CONFIGS = "/kohya_ss/configs"
+    TRAIN_CONFIGS = "/kohya_ss/train_configs"
 
 models_vol = modal.Volume.from_name("kohya-models", create_if_missing=True)
 dataset_vol = modal.Volume.from_name("kohya-dataset", create_if_missing=True)
 outputs_vol = modal.Volume.from_name("kohya-outputs", create_if_missing=True)
-configs_vol = modal.Volume.from_name("kohya-configs", create_if_missing=True)
+train_configs_vol = modal.Volume.from_name("kohya-train-configs", create_if_missing=True)
 
 @app.function(
     memory=MEMORY_CONFIG,
@@ -117,37 +117,37 @@ configs_vol = modal.Volume.from_name("kohya-configs", create_if_missing=True)
         Paths.MODELS: models_vol,
         Paths.DATASET: dataset_vol,
         Paths.OUTPUTS: outputs_vol,
-        Paths.CONFIGS: configs_vol,
+        Paths.TRAIN_CONFIGS: train_configs_vol,
     },
     max_containers=1,
     retries=0,
 )
 def train_anima():
     import torch
-    from huggingface_hub import snapshot_download
+    #from huggingface_hub import snapshot_download
 
     logger.info(f"CUDA available: {torch.cuda.is_available()}")
     logger.info(f"Pytorch version: {torch.__version__}")
 
-    target_qwen_dir = f"{Paths.CONFIGS}/qwen3_06b"
-    if not os.path.exists(target_qwen_dir):
-        logger.info(f"Downloading Qwen3 0.6b tokenizer to {target_qwen_dir}...")
-        snapshot_download(
-            repo_id="Qwen/Qwen3-0.6B",
-            local_dir=target_qwen_dir,
-            allow_patterns=["config.json", "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"],
-        )
+    #target_qwen_dir = f"{Paths.CONFIGS}/qwen3_06b"
+    #if not os.path.exists(target_qwen_dir):
+    #    logger.info(f"Downloading Qwen3 0.6b tokenizer to {target_qwen_dir}...")
+    #    snapshot_download(
+    #        repo_id="Qwen/Qwen3-0.6B",
+    #        local_dir=target_qwen_dir,
+    #        allow_patterns=["config.json", "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"],
+    #    )
 
-    target_t5_dir = f"{Paths.CONFIGS}/t5_old"
-    if not os.path.exists(target_t5_dir):
-        logger.info(f"Downloading T5 tokenizer to {target_t5_dir}...")
-        snapshot_download(
-            repo_id="google/t5-v1_1-xxl",
-            local_dir=target_t5_dir,
-            allow_patterns=["spiece.model", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"],
-        )
+    #target_t5_dir = f"{Paths.CONFIGS}/t5_old"
+    #if not os.path.exists(target_t5_dir):
+    #    logger.info(f"Downloading T5 tokenizer to {target_t5_dir}...")
+    #    snapshot_download(
+    #        repo_id="google/t5-v1_1-xxl",
+    #        local_dir=target_t5_dir,
+    #        allow_patterns=["spiece.model", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"],
+    #    )
 
-    configs_vol.commit()
+    #configs_vol.commit()
 
     subprocess.run(
     [
@@ -155,7 +155,7 @@ def train_anima():
         "launch",
         "anima_train_network.py",
         "--config_file",
-        f"{Paths.CONFIGS}/train_config.toml",
+        f"{Paths.TRAIN_CONFIGS}/train_config.toml",
     ],
     cwd=f"{Paths.KOHYA_BASE}",
     check=True,

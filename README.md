@@ -51,7 +51,7 @@ The `app.py` script maps these volumes to paths inside the container:
 * `kohya-models` volume is mounted at `/kohya_ss/models/`
 * `kohya-dataset` volume is mounted at `/kohya_ss/dataset/` (Note: singular "dataset" in the path as per your `app.py`)
 * `kohya-outputs` volume is mounted at `/kohya_ss/outputs/`
-* `kohya-configs` volume is mounted at `/kohya_ss/configs/`
+* `kohya-train-configs` volume is mounted at `/kohya_ss/train_configs/`
 
 **Uploading Base Models:**
    * Volume Name: `kohya-models`
@@ -70,11 +70,11 @@ The `app.py` script maps these volumes to paths inside the container:
         ```
 
 **Uploading train config:**
-   * Volume Name: `kohya-configs`
+   * Volume Name: `kohya-train-configs`
    * Example: 
         ```bash
-        modal volume put kohya-configs -f train_config.toml train_config.toml
-        modal volume put kohya-configs -f dataset_config.toml dataset_config.toml 
+        modal volume put kohya-train-configs -f train_config.toml train_config.toml
+        modal volume put kohya-train-configs -f dataset_config.toml dataset_config.toml 
         ```
 
 **Verifying Volume Contents:**
