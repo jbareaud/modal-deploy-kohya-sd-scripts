@@ -14,9 +14,8 @@ KOHYA_COMMIT = "690ea7f96c23182352ec63def76d431c6120bd2f" # https://github.com/k
 NVIDIA_CUDA_IMAGE = "nvidia/cuda:12.4.0-devel-ubuntu22.04"
 
 kohya_image = (
-    modal.Image.from_registry(
-        NVIDIA_CUDA_IMAGE, add_python=PYTHON_VERSION
-    )
+    modal.Image.from_registry(NVIDIA_CUDA_IMAGE, add_python=PYTHON_VERSION)
+    .add_local_file("config.toml", remote_path="/root/config.toml", copy=True)
     .env({
         "DEBIAN_FRONTEND": "noninteractive",
         "TZ": "Etc/UTC",
@@ -60,7 +59,8 @@ kohya_image = (
         "accelerate config default",
 
         "echo 'Clean up existing run files if exists...'",
-        "rm -rf models dataset outputs configs",
+        "rm -rf models dataset outputs",
+
         gpu="any",
     )
     .run_commands(
@@ -150,15 +150,15 @@ def train_anima():
     #configs_vol.commit()
 
     subprocess.run(
-    [
-        "accelerate",
-        "launch",
-        "anima_train_network.py",
-        "--config_file",
-        f"{Paths.TRAIN_CONFIGS}/train_config.toml",
-    ],
-    cwd=f"{Paths.KOHYA_BASE}",
-    check=True,
+        [
+            "accelerate",
+            "launch",
+            "anima_train_network.py",
+            "--config_file",
+            f"{Paths.TRAIN_CONFIGS}/train_config.toml",
+        ],
+        cwd=f"{Paths.KOHYA_BASE}",
+        check=True,
     )
     outputs_vol.commit()
     logger.info("Training complete. Exiting container.")

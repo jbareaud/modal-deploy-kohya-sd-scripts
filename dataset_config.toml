@@ -14,36 +14,6 @@ batch_size = 2
 keep_tokens = 2
 
   [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Bosatsu"
+  image_dir = "/kohya_ss/dataset/CharA"
   num_repeats = 5
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Fubuki"
-  num_repeats = 3
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/MikoMido"
-  num_repeats = 3
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Ninnin"
-  num_repeats = 3
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Ranmaru"
-  num_repeats = 5
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Yaku"
-  num_repeats = 3
-  keep_tokens = 2
-
-  [[datasets.subsets]]
-  image_dir = "/kohya_ss/dataset/Group"
-  num_repeats = 3
   keep_tokens = 2

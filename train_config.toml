@@ -20,8 +20,8 @@ qwen3 = "/kohya_ss/models/qwen_3_06b_base.safetensors"
 vae = "/kohya_ss/models/qwen_image_vae.safetensors"
 
 network_module = "networks.lora_anima"
-network_dim = 32
-network_alpha = 16
+network_dim = 128
+network_alpha = 64
 
 #network_args = ["rank_dropout=0.1", "module_dropout=0.1"]
 
@@ -35,14 +35,14 @@ optimizer_args = [ "weight_decay=0.01", "betas=0.9,0.99"]
 
 mixed_precision = "bf16"
 
-wandb_run_name = "MyChara"
-output_name = "MyChara"
+wandb_run_name = "Lora"
+output_name = "Lora"
 logging_dir = "/kohya_ss/outputs/log"
 output_dir = "/kohya_ss/outputs/models"
 
 save_every_n_epochs = 1
-max_train_epochs = 20
-max_train_steps = 6000
+max_train_epochs = 15
+max_train_steps = 10000
 
 #keep_tokens = 1
 
