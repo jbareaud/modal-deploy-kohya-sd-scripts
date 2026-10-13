@@ -95,7 +95,6 @@ except Exception as e:
 app = modal.App(name="kohya-ss-sd-scripts", image=kohya_image)
 
 class Paths:
-    #CACHE = "/cache"
     KOHYA_BASE = "/kohya_ss"
     MODELS = "/kohya_ss/models"
     DATASET = "/kohya_ss/dataset"
@@ -124,30 +123,9 @@ train_configs_vol = modal.Volume.from_name("kohya-train-configs", create_if_miss
 )
 def train_anima():
     import torch
-    #from huggingface_hub import snapshot_download
 
     logger.info(f"CUDA available: {torch.cuda.is_available()}")
     logger.info(f"Pytorch version: {torch.__version__}")
-
-    #target_qwen_dir = f"{Paths.CONFIGS}/qwen3_06b"
-    #if not os.path.exists(target_qwen_dir):
-    #    logger.info(f"Downloading Qwen3 0.6b tokenizer to {target_qwen_dir}...")
-    #    snapshot_download(
-    #        repo_id="Qwen/Qwen3-0.6B",
-    #        local_dir=target_qwen_dir,
-    #        allow_patterns=["config.json", "tokenizer.json", "tokenizer_config.json", "vocab.json", "merges.txt"],
-    #    )
-
-    #target_t5_dir = f"{Paths.CONFIGS}/t5_old"
-    #if not os.path.exists(target_t5_dir):
-    #    logger.info(f"Downloading T5 tokenizer to {target_t5_dir}...")
-    #    snapshot_download(
-    #        repo_id="google/t5-v1_1-xxl",
-    #        local_dir=target_t5_dir,
-    #        allow_patterns=["spiece.model", "tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"],
-    #    )
-
-    #configs_vol.commit()
 
     subprocess.run(
         [
