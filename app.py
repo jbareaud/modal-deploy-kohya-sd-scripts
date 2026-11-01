@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 PYTHON_VERSION = "3.10"
 KOHYA_REPO_URL = "https://github.com/kohya-ss/sd-scripts.git"
-KOHYA_COMMIT = "04ca541746b7667b27eab230db067579f682895e" # https://github.com/kohya-ss/sd-scripts/releases/tag/v0.12.1
+KOHYA_COMMIT = "cb70b96858477e716a2096292ab8aab433277f38" # https://github.com/kohya-ss/sd-scripts/releases/tag/v0.12.3
 NVIDIA_CUDA_IMAGE = "nvidia/cuda:12.4.0-devel-ubuntu22.04"
 
 kohya_image = (
